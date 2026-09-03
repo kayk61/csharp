@@ -47,8 +47,9 @@ procedimento menuPrincipal()
         escreval("digite outra opção")
         leia(opcaoMenu)
   caso 5
-  escreval("encerrando sistema, ate logo")
-  fimalgoritmo
+       escreval("encerrando sistema, ate logo")
+       fimalgoritmo
+  
   outrocaso
   escreval("opção invalida, tente novamente")
 
@@ -57,6 +58,17 @@ procedimento menuPrincipal()
   
 
 fimprocedimento
+
+procedimento  finalizar()
+inicio
+
+escreval("encerrando sistema, ate logo")
+fimalgoritmo
+
+
+
+fimprocedimento
+
 
 Procedimento consultarQuarto()
 inicio
@@ -102,8 +114,6 @@ inicio
 
 telaInicial()
 MenuPrincipal()
-consultarQuarto ()
-alugarQuarto()
-cancelarQuarto()
+
 
 fimalgoritmo
