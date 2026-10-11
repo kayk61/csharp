@@ -1,0 +1,199 @@
+﻿using System;
+using System.Collections.Generic;
+
+class Program
+{
+    const double DESCONTO_VIP = 5;
+    const string CODIGO_PROMO = "PROMO10";
+    const double DESCONTO_PROMO = 10;
+
+    static void Main()
+    {
+        Console.WriteLine("=== SIMULADOR DE CUPOM FISCAL ===");
+        Console.WriteLine();
+
+        List<string> nomes = new List<string>();
+        List<double> precos = new List<double>();
+        List<double> descontosPct = new List<double>();
+        List<double> valoresDesconto = new List<double>();
+        List<double> precosFinais = new List<double>();
+
+        string outro;
+        do
+        {
+            Console.WriteLine("--- Produto " + (nomes.Count + 1) + " ---");
+
+            string nome = LerTexto("Nome do produto: ");
+            double preco = LerDouble("Preço do produto (R$): ", 0.01, 1000000);
+            double descontoPct = LerDouble("Desconto em % (0 a 100): ", 0, 100);
+
+            double valorDesconto = CalcularPercentual(preco, descontoPct);
+            double precoFinal = preco - valorDesconto;
+
+            nomes.Add(nome);
+            precos.Add(preco);
+            descontosPct.Add(descontoPct);
+            valoresDesconto.Add(valorDesconto);
+            precosFinais.Add(precoFinal);
+
+            outro = LerSimNao("Adicionar outro produto? (s/n): ");
+            Console.WriteLine();
+
+        } while (outro == "s");
+
+        double subtotal = 0;
+        for (int i = 0; i < precosFinais.Count; i++)
+        {
+            subtotal = subtotal + precosFinais[i];
+        }
+
+        double valorVip = 0;
+        string vip = LerSimNao("Cliente VIP? (s/n): ");
+        if (vip == "s")
+        {
+            valorVip = CalcularPercentual(subtotal, DESCONTO_VIP);
+        }
+
+        double valorPromo = 0;
+        bool usouCupom = false;
+        Console.Write("Código promocional (Enter para pular): ");
+        string codigo = Console.ReadLine().Trim().ToUpper();
+
+        if (codigo == CODIGO_PROMO)
+        {
+            usouCupom = true;
+            valorPromo = CalcularPercentual(subtotal - valorVip, DESCONTO_PROMO);
+            Console.WriteLine("Cupom aplicado!");
+        }
+        else if (codigo != "")
+        {
+            Console.WriteLine("Código inválido. Nenhum desconto aplicado.");
+        }
+
+        double taxaImposto = LerDouble("Taxa de imposto em % (0 a 100): ", 0, 100);
+        double baseImposto = subtotal - valorVip - valorPromo;
+        double valorImposto = CalcularPercentual(baseImposto, taxaImposto);
+        double totalFinal = baseImposto + valorImposto;
+
+        int parcelas = 1;
+        string parcelado = LerSimNao("Pagar parcelado? (s/n): ");
+        if (parcelado == "s")
+        {
+            parcelas = LerInt("Quantidade de parcelas (2 a 12): ", 2, 12);
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("====================================");
+        Console.WriteLine("       CUPOM FISCAL (SIMULAÇÃO)");
+        Console.WriteLine("====================================");
+        Console.WriteLine("Data/Hora: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
+        Console.WriteLine("------------------------------------");
+
+        for (int i = 0; i < nomes.Count; i++)
+        {
+            Console.WriteLine((i + 1) + ". " + nomes[i]);
+            Console.WriteLine("   Preço original:    " + precos[i].ToString("C2"));
+            Console.WriteLine("   Desconto aplicado: " + descontosPct[i] + "%");
+            Console.WriteLine("   Valor do desconto: " + valoresDesconto[i].ToString("C2"));
+            Console.WriteLine("   Preço final:       " + precosFinais[i].ToString("C2"));
+            Console.WriteLine("------------------------------------");
+        }
+
+        Console.WriteLine("Subtotal:        " + subtotal.ToString("C2"));
+
+        if (vip == "s")
+        {
+            Console.WriteLine("Desconto VIP:    -" + valorVip.ToString("C2"));
+        }
+        if (usouCupom)
+        {
+            Console.WriteLine("Cupom " + CODIGO_PROMO + ":   -" + valorPromo.ToString("C2"));
+        }
+
+        Console.WriteLine("Imposto (" + taxaImposto + "%): +" + valorImposto.ToString("C2"));
+        Console.WriteLine("====================================");
+        Console.WriteLine("TOTAL A PAGAR:   " + totalFinal.ToString("C2"));
+        Console.WriteLine("====================================");
+
+        if (parcelas > 1)
+        {
+            double valorParcela = totalFinal / parcelas;
+            Console.WriteLine("Pagamento: " + parcelas + "x de " + valorParcela.ToString("C2"));
+        }
+        else
+        {
+            Console.WriteLine("Pagamento: à vista");
+        }
+
+        Console.WriteLine("====================================");
+        Console.WriteLine("      Obrigado pela preferência!");
+        Console.WriteLine();
+        Console.WriteLine("Pressione qualquer tecla para sair...");
+        Console.ReadKey();
+    }
+
+    static double CalcularPercentual(double valor, double percentual)
+    {
+        return valor * percentual / 100;
+    }
+
+    static string LerTexto(string mensagem)
+    {
+        while (true)
+        {
+            Console.Write(mensagem);
+            string texto = Console.ReadLine().Trim();
+
+            if (texto != "")
+            {
+                return texto;
+            }
+            Console.WriteLine("Entrada inválida: não pode ficar vazio.");
+        }
+    }
+
+    static double LerDouble(string mensagem, double minimo, double maximo)
+    {
+        while (true)
+        {
+            Console.Write(mensagem);
+            string entrada = Console.ReadLine();
+
+            if (double.TryParse(entrada, out double valor) && valor >= minimo && valor <= maximo)
+            {
+                return valor;
+            }
+            Console.WriteLine("Valor inválido. Digite um número entre " + minimo + " e " + maximo + ".");
+        }
+    }
+
+    static int LerInt(string mensagem, int minimo, int maximo)
+    {
+        while (true)
+        {
+            Console.Write(mensagem);
+            string entrada = Console.ReadLine();
+
+            if (int.TryParse(entrada, out int valor) && valor >= minimo && valor <= maximo)
+            {
+                return valor;
+            }
+            Console.WriteLine("Valor inválido. Digite um inteiro entre " + minimo + " e " + maximo + ".");
+        }
+    }
+
+    static string LerSimNao(string mensagem)
+    {
+        while (true)
+        {
+            Console.Write(mensagem);
+            string resposta = Console.ReadLine().Trim().ToLower();
+
+            if (resposta == "s" || resposta == "n")
+            {
+                return resposta;
+            }
+            Console.WriteLine("Responda apenas com 's' ou 'n'.");
+        }
+    }
+}
